@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Content with Scroll Lock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            overflow-y: scroll;
+        }
+        #section1, #section2 {
+            height: 100vh;
+            padding: 20px;
+        }
+        #section1 {
+            background-color: lightblue;
+        }
+        #section2 {
+            background-color: lightcoral;
+        }
+
+        .sticky-container {
+            position: relative;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        .sticky-content {
+            position: sticky;
+            top: 50vh;
+            background-color: lightgreen;
+            padding: 10px;
+            border: 1px solid #333;
+            height: 150px;
+            overflow-y: hidden;
+        }
+
+        .scroll-content {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+        .scroll-content.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div id="section1">
+    <h2>Section 1</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin feugiat eu justo nec facilisis.</p>
+    <p>Donec varius nulla id ex hendrerit, in faucibus nisl malesuada. Curabitur non magna at magna vestibulum lacinia eget eu turpis.</p>
+    
+</div>
+<button id="reset">Reset</button>
+<div class="sticky-container">
+    <div class="sticky-content" id="stickyParagraph">
+        This paragraph will stick to the viewport when it reaches 50% of the viewport height while scrolling.
+    </div>
+</div>
+
+<div id="section2">
+    <h2>Section 2</h2>
+    <p>Nulla eget velit vestibulum, sollicitudin nulla a, tristique nunc. Sed vehicula euismod neque, et laoreet lectus tincidunt a.</p>
+    <p>Morbi nec nisi nec elit hendrerit varius. Suspendisse eget risus id augue venenatis lacinia.</p>
+</div>
+
+<script>
+    const stickyParagraph = document.getElementById("stickyParagraph");
+    const extraContent = [
+        "Here's some additional content appearing as you scroll.",
+        "More content keeps coming as you go down.",
+        "Keep scrolling for more text inside the sticky box!",
+        "Almost there! Just one more!",
+        "This is the final piece of content."
+    ];
+    let contentIndex = 0;
+    let isScrollLocked = false;
+    let scrollDistance = 0;
+    const distancePerParagraph = 150; // Adjust this value as needed
+    let allVisible = false;
+
+    window.addEventListener("scroll", () => {
+        const windowHeight = window.innerHeight;
+        const stickyRect = stickyParagraph.getBoundingClientRect();
+
+        if (stickyRect.top <= windowHeight * 0.5 && !isScrollLocked && !allVisible) {
+            document.body.style.overflow = 'hidden';
+            isScrollLocked = true;
+            console.log(`scroll lock triggered`);
+        }
+    });
+
+    // Track wheel scroll distance
+    window.addEventListener("wheel", (event) => {
+        if (isScrollLocked && contentIndex < extraContent.length) {
+            scrollDistance += Math.abs(event.deltaY);
+
+            if (scrollDistance >= distancePerParagraph) {
+                addContent();
+                scrollDistance = 0; // Reset distance after adding each paragraph
+                
+            }
+        }
+    });
+
+    function addContent() {
+        if (contentIndex < extraContent.length) {
+            console.log(`addcontent() triggered ${contentIndex + 1}`);
+            const newParagraph = document.createElement("div");
+            newParagraph.classList.add("scroll-content");
+            newParagraph.textContent = extraContent[contentIndex];
+            stickyParagraph.appendChild(newParagraph);
+
+            console.log('log scroll distance:', scrollDistance);
+                newParagraph.classList.add("visible");
+
+            
+
+            contentIndex++;
+
+            // Toggle scrollbar only if content overflows
+            if (stickyParagraph.scrollHeight > stickyParagraph.clientHeight) {
+                console.log(`hide scrollbar`);
+                stickyParagraph.style.overflowY = 'hidden';
+            }
+        }
+
+        // Unlock scrolling once all content is shown
+        if (contentIndex >= extraContent.length) {
+            console.log(`scroll lock reset`);
+            document.body.style.overflow = ''; // Unlock scrolling
+            isScrollLocked = false;
+            allVisible = true;
+        }
+    }
+
+const reset = document.querySelector('#reset');
+reset.addEventListener('click', () => {
+    document.body.style.overflow = '';
+});
+</script>
+
+</body>
+</html>
